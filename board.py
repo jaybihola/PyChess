@@ -12,6 +12,7 @@ class SelectionType(Enum):
     INVALIDTARGET = 3
     POSSIBLEOPTION = 4
     IMPOSSIBLEOPTION = 5
+    VALIDKILLINGMOVE = 6
 
 class Selection:
     selection_to_color_mapping = {
@@ -19,7 +20,8 @@ class Selection:
         SelectionType.VALIDTARGET: Colors.GREEN,
         SelectionType.INVALIDTARGET: Colors.RED,
         SelectionType.POSSIBLEOPTION: Colors.BLUE,
-        SelectionType.IMPOSSIBLEOPTION: Colors.PINK
+        SelectionType.IMPOSSIBLEOPTION: Colors.PINK,
+        SelectionType.VALIDKILLINGMOVE: Colors.LIGHT_RED,
     }
 
     def __init__(self, pos, sel_type:SelectionType):
@@ -145,6 +147,7 @@ class ChessBoard:
 
     def get_valid_moves(self, pos):
         (x, y) = pos
+        print ("clicked pos", pos)
         piece = self.board[y][x]
         print(piece)
         if isinstance(piece, Empty):
@@ -153,13 +156,35 @@ class ChessBoard:
         print("valid mvoes", valid_moves)
         filtered_valid_moves = []
         invalid_moves = valid_moves[:]
-        if (piece.can_jump or isinstance(piece, Pawn) or isinstance(piece, King)):
+        killing_moves = []
+        if (piece.can_jump or isinstance(piece, King)):
+            print("piece can jump or is king")
             for move in valid_moves:
                 (moveX, moveY) = move
-                if isinstance(self.board[moveY][moveX], Empty) or self.board[moveY][moveX].player != piece.player:
+                if isinstance(self.board[moveY][moveX], Empty):
                     filtered_valid_moves.append(move)
                     invalid_moves.remove(move)
+                elif (self.board[moveY][moveX].player != piece.player):
+                    killing_moves.append(move)
+                    filtered_valid_moves.append(move)
+                    invalid_moves.remove(move)
+        elif (isinstance(piece, Pawn)):
+            print("piece is pawn")
+            invalid_moves = []
+            for move in valid_moves:
+                print ("analyzing move:", move)
+                (moveX, moveY) = move
+                isUpDown = (moveX - x) == 0
+                isForward = (moveY - y) < 0 if piece.player.name == "player1" else (moveY - y) > 0
+                print("is up down", isUpDown)
+                print("is forward", isForward)
+                if isinstance(self.board[moveY][moveX], Empty) and isUpDown and isForward:
+                    filtered_valid_moves.append(move)
+                elif not isinstance(self.board[moveY][moveX], Empty) and self.board[moveY][moveX].player != piece.player and isForward:
+                    filtered_valid_moves.append(move)
+                    killing_moves.append(move)
         else:
+            print("piece is other")
             invalid_moves = [item for _, sublist in invalid_moves for item in sublist]
             for (direction, direction_moves) in valid_moves:
                 for move in direction_moves:
@@ -170,13 +195,14 @@ class ChessBoard:
                     elif self.board[moveY][moveX].player != piece.player:
                         filtered_valid_moves.append(move)
                         invalid_moves.remove(move)
+                        killing_moves.append(move)
                         break
                     else:
                         break
 
 
         print("filtered valid moves", filtered_valid_moves)
-        return filtered_valid_moves, invalid_moves
+        return filtered_valid_moves, invalid_moves, killing_moves
 
 # run main to test the board logic
 def main():

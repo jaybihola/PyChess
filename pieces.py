@@ -174,19 +174,22 @@ class Pawn(Piece):
 
     def findValidMoves(self, current_position, board_size):
         x, y = current_position
-        print("curr position of piece", current_position)
-        direction = 1 if self.player == 'player1' else -1
+        direction = -1 if self.player.name == 'player1' else 1
         possible_moves = [(x, y + direction)]
 
         # Add initial two-step move
-        if (self.player == 'player1' and x == board_size - 2) or (self.player == 'player2' and x == 1):
-            possible_moves.append((x + 2 * direction, y))
+        print()
+        if (self.player.name == 'player1' and y == board_size - 2) or (self.player.name == 'player2' and y == 1):
+            print ("in here")
+            possible_moves.append((x, y + (direction * 2)))
 
         valid_moves = [
             (new_x, new_y)
             for new_x, new_y in possible_moves
             if 0 <= new_x < board_size and 0 <= new_y < board_size
         ]
+
+        valid_moves.extend(self.findCapturingMoves(current_position, board_size))
 
         return valid_moves
 

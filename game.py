@@ -18,17 +18,19 @@ class Game:
             return
         self.clicks.append(click)
         self.board.selections.append(Selection(click, SelectionType.SELECTEDSQUARE))
-        (valid_moves, removed_moves) = self.board.get_valid_moves(click)
+        (valid_moves, removed_moves, killing_moves) = self.board.get_valid_moves(click)
         for move in valid_moves:
             self.board.selections.append(Selection(move, SelectionType.POSSIBLEOPTION))
         for move in removed_moves:
             self.board.selections.append(Selection(move, SelectionType.IMPOSSIBLEOPTION))
+        for move in killing_moves:
+            self.board.selections.append(Selection(move, SelectionType.VALIDKILLINGMOVE))
 
     def __handle_second_click(self, click):
         self.board.selections.clear()
         first_click = self.clicks[0]
         print("first click", first_click)
-        (valid_moves, _) = self.board.get_valid_moves(first_click)
+        (valid_moves, _, _) = self.board.get_valid_moves(first_click)
         print("second click", click)
         print("-----------------")
 

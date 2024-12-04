@@ -13,14 +13,14 @@ border_size = 40
 window_size = (board_size * square_size + 2 * border_size,
                board_size * square_size + 2 * border_size)
 screen = pygame.display.set_mode(window_size)
+pygame.display.set_caption("PyChess")
+
 game = Game()
 
 # Main loop
 running = True
 while running:
     for event in pygame.event.get():
-        # if event.type == pygame.QUIT:
-        #     running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             x, y = (pos[0] - border_size) // square_size, (pos[1] - border_size) // square_size
